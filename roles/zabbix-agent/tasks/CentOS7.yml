@@ -9,6 +9,17 @@
         name: epel-release
         enablerepo: extras
         state: present
+    
+    - name: Pegando InstanceID
+      uri:
+        url: http://169.254.169.254/latest/meta-data/instance-id
+        return_content: yes
+      register: id
+      when: zabbix_hostname == ""
+
+    - set_fact:
+        zabbix_hostname={{ id.content }}
+      when: zabbix_hostname == ""
 
     - name: Aplicando config do Zabbix
       template:

@@ -1,8 +1,8 @@
 ---
 - hosts: all
   vars:
-    zabbix_server_ip: 'zabbix.afilio.vpc.'
-    zabbix_hostmetadata: 'os-linux'
+    zabbix_server_ip: 'SERVERIP'
+    zabbix_hostmetadata: 'METADATA'
   become: yes
   roles:
     - zabbix-agent
