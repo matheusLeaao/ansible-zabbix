@@ -1,3 +1,9 @@
 ---
   - name: Incluindo tasks para cada distribuicao
     include_tasks: "{{ ansible_distribution }}{{ ansible_distribution_major_version }}.yml"
+    when: ansible_distribution != "Amazon"
+
+  - name: Incluindo tasks para cada distribuicao
+    include_tasks: "{{ ansible_distribution }}.yml"
+    when: ansible_distribution  == "Amazon"
+
