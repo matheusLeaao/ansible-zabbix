@@ -6,3 +6,4 @@
   become: yes
   roles:
     - zabbix-agent
+# Utilizar ANSIBLE_HOST_KEY_CHECKING=False no começo do comando
