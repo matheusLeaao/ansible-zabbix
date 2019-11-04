@@ -1,4 +1,10 @@
 ---
+    - name: user zabbix in visudoers
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        line: 'zabbix ALL=NOPASSWD: ALL'
+        
     - name: Instalando Zabbix Agent
       apt:
         deb: "{{ url_agent_ubuntu18 }}"
