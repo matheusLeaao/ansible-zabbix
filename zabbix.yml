@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    zabbix_server_ip: 'zabbix.ws.internal'
+    zabbix_server_ip: ''
     zabbix_hostmetadata: 'os-linux'
   become: yes
   roles:
