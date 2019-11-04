@@ -1,4 +1,10 @@
 ---
+    - name: user zabbix in visudoers
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        line: 'zabbix ALL=NOPASSWD: ALL'
+        
     - set_fact:
         ansible_python_interpreter=/usr/bin/python3
 
