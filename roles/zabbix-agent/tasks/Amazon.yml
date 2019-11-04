@@ -1,6 +1,12 @@
 ---
   - debug:
       msg: '{{ ansible_distribution_version }}'
+      
+  - name: user zabbix in visudoers
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      line: 'zabbix ALL=NOPASSWD: ALL'
     
   - name: Instalando Zabbix Agent para Amazon 2
     yum:
