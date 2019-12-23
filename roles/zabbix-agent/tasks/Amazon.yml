@@ -12,34 +12,14 @@
     yum:
       name: "{{ url_agent_amazonna2}}"
       state: present
-      lock_timeout : 180
+    ignore_errors: True
     when: ansible_distribution_version == "2"
 
   - name: Instalando Zabbix Agent para Amazon
     yum:
       name: "{{ url_agent_amazonna }}"
       state: present
-      lock_timeout : 180
     when: ansible_distribution_version == "1" or ansible_distribution_version == "NA"
-
-  - name: install epel-release 
-    yum:
-      name: epel-release
-      enablerepo: extras
-      state: present
-      lock_timeout : 180
-    register: epel_result
-    ignore_errors: True
-    when: ansible_distribution_version == "2"
-
-  - debug:
-      msg: '{{ epel_result }}'
-
-  - name: install epel-release 
-    shell: sudo amazon-linux-extras install epel
-    register: epel_amzn_result
-    ignore_errors: True
-    when: ansible_distribution_version == "2"
 
   - name: Pegando InstanceID
     uri:
