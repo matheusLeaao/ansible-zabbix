@@ -9,6 +9,7 @@
       yum:
         name: "{{ url_agent_centos6 }}"
         state: present
+        lock_timeout : 180
 
     - name: Pegando InstanceID
       uri:
