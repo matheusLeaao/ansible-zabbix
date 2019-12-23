@@ -9,12 +9,14 @@
       yum:
         name: "{{ url_agent_centos7 }}"
         state: present
+        lock_timeout : 180
 
     - name: 
       yum:
         name: epel-release
         enablerepo: extras
         state: present
+        lock_timeout : 180
     
     - name: Pegando InstanceID
       uri:
