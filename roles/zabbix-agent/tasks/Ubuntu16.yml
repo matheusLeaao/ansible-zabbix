@@ -8,7 +8,6 @@
     - name: Instalando Zabbix Agent
       apt:
         deb: "{{ url_agent_ubuntu16 }}"
-        update_cache: yes
 
     - name: Pegando InstanceID
       uri:
