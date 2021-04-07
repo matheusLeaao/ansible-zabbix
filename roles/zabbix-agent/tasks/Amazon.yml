@@ -20,6 +20,13 @@
       name: "{{ url_agent_amazonna }}"
       state: present
     when: ansible_distribution_version == "1" or ansible_distribution_version == "NA"
+  
+  - name: Add the user 'zabbix' for group of 'docker'
+    user:
+      name: zabbix
+      groups: docker
+      append: yes
+    ignore_errors: True
 
   - name: Pegando InstanceID
     uri:

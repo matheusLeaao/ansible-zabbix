@@ -10,19 +10,13 @@
         name: "{{ url_agent_centos7 }}"
         state: present
         lock_timeout : 180
-    
-    - name: Add the user 'zabbix' for group of 'docker'
-      user:
-        name: zabbix
-        group: docker
-      ignore_errors: True
 
-    - name: 
-      yum:
-        name: epel-release
-        enablerepo: extras
-        state: present
-        lock_timeout : 180
+    #- name: 
+    #  yum:
+    #    name: epel-release
+    #    enablerepo: extras
+    #    state: present
+    #    lock_timeout : 180
     
     - name: Pegando InstanceID
       uri:

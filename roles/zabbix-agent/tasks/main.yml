@@ -7,3 +7,6 @@
     include_tasks: "{{ ansible_distribution }}.yml"
     when: ansible_distribution  == "Amazon"
 
+  - name: Incluindo tasks para cada distribuicao
+    include_tasks: "{{ ansible_distribution }}.yml"
+    when: ansible_distribution  == "CentOS7" or ansible_distribution  == "OracleLinux7"
