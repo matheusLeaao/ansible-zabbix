@@ -1,0 +1,10 @@
+---
+user_zabbix: "Admin"
+pass_zabbix: ""
+ZABBIX_URL: "http://localhost/"
+ZABBIX_PRIVATE_IP: ""
+url_zabbix_api: "http://localhost/api_jsonrpc.php"
+aws_access_key_id: ""
+aws_secret_access_key: ""
+
+

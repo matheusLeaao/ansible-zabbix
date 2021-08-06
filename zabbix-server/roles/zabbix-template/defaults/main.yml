@@ -1,0 +1,5 @@
+####Colocar URL do Zabbix API executada de dentro do host
+url_zabbix_api: "http://localhost/api_jsonrpc.php"
+####Usuário e senha do Zabbix Server
+user_zabbix: Admin
+pass_zabbix: zabbix

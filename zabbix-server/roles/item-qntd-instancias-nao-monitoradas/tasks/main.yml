@@ -1,0 +1,58 @@
+---
+  - name: Install boto3 e pyzabbix
+    pip:
+      name:
+        - boto3
+        - pyzabbix
+
+  - name: Criar check-qntd-instances-no-monit.py
+    file:
+      path: "/usr/lib/zabbix/externalscripts/check-qntd-instances-no-monit.py"
+      state: touch
+      mode: 0755
+
+  - name: modificar check-qntd-instances-no-monit.py
+    template:
+      src: "check-qntd-instances-no-monit.py.j2"
+      dest: "/usr/lib/zabbix/externalscripts/check-qntd-instances-no-monit.py"
+
+  - name: Get authentication token Zabbix
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: user.login
+        id: 1
+        auth: null
+        params: 
+          user: '{{ user_zabbix }}'
+          password: '{{ pass_zabbix }}'
+      return_content: yes
+    register: auth
+
+  - name: Criar item Quantidade de Instancias não monitoradas
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: item.create
+        id: 1
+        auth: '{{ auth | json_query("json.result")}}'
+        params:
+          name: Quantidade de instancias não monitoradas
+          hostid: "10084"
+          interfaceid: "1"
+          key_: "check-qntd-instances-no-monit.py"
+          type: "10"
+          value_type: "4"
+          delay: 5m
+    register: output
+
+  - debug:
+      msg: '{{ output }}'

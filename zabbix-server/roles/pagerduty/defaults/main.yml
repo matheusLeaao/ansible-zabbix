@@ -1,0 +1,12 @@
+####Colocar token da integração criada dentro do serviço no PagerDuty
+token_pagerduty: "COLOCARTOKENAQUI"
+
+####Nome que será no User e Action dentro do Zabbix
+pd_name: "Mandic"
+
+####Colocar URL do Zabbix API executada de dentro do host
+url_zabbix_api: "http://localhost/api_jsonrpc.php"
+
+####Usuário e senha do Zabbix Server
+user_zabbix: Admin
+pass_zabbix: zabbix

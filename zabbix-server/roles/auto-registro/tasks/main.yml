@@ -1,0 +1,69 @@
+---
+
+  - name: Get authentication token Zabbix
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: user.login
+        id: 1
+        auth: null
+        params: 
+          user: '{{ user_zabbix}}'
+          password: '{{ pass_zabbix }}'
+      return_content: yes
+    register: auth
+
+  - name: Check if action Auto Registration Linux exist
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: action.get
+        id: 1
+        auth: '{{ auth | json_query("json.result")}}'
+        params:
+          filter:
+            name: "Auto Registration Linux"
+      return_content: yes
+    register: action_return
+
+  - set_fact:
+      action_return: '{{ action_return | json_query("json.result[0].actionid") }}'
+  
+  - debug:
+      msg: '{{ action_return }}'
+
+  - name: Create action to Slack
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: action.create
+        id: 1
+        auth: '{{ auth | json_query("json.result")}}'
+        params:
+          name: Auto Registration Linux
+          status: 0
+          eventsource: 2
+          def_shortdata: "Auto registration: {HOST.HOST}"
+          def_longdata: "Host name: {HOST.HOST}\r\nHost IP: {HOST.IP}\r\nAgent port: {HOST.PORT}"
+              conditions:
+               register: action_returns
+    when: action_return == ""
+
+    # - set_fact:
+    #  action_return: '{{ action_returns | json_query("json.result.actionids[0]") }}'
+    # when: action_return == ""
+
+    #- debug:
+    #  msg: '{{ action_return }}'

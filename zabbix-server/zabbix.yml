@@ -1,0 +1,30 @@
+---
+- hosts: all
+  vars:
+    pd_name: "Mandic"
+    zbx_db_pass: "" #PREENCHIMENTO OBRIGATÓRIO NA INSTALAÇÃO DO ZABBIX
+    zbx_db_user: "zabbix"
+    zbx_db_name: "zabbix"
+    url_zabbix_api: "http://localhost/api_jsonrpc.php"
+    user_zabbix: "Admin"
+    ZABBIX_PRIVATE_IP: ""
+    zabbix_server_ip_or_dns: ""
+    pass_zabbix: "zabbix"  
+    aws_access_key_id: ""
+    aws_secret_access_key: ""
+    token_pagerduty: ""
+    WEBHOOK: ""
+    ChannelSlack: ""
+  become: yes
+  roles:
+    #- test
+    #- auto-registro
+    #- item-auto-remove
+    #- zabbix-server
+    #- pagerduty
+    #- Slack
+    - zabbix-template #Descomentar apenas este para realizar a instalação do zabbix server
+    #- zabbix-change-password
+    #- item-qntd-instancias-nao-monitoradas
+   
+

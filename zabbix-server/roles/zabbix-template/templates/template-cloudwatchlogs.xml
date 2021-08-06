@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-08-04T00:29:32Z</date>
+    <groups>
+        <group>
+            <name>AWS</name>
+        </group>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template CloudWatch Logs - Mandic</template>
+            <name>Template CloudWatch Logs - Mandic</name>
+            <groups>
+                <group>
+                    <name>AWS</name>
+                </group>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Logs</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Check Logs</name>
+                    <type>EXTERNAL</type>
+                    <key>cloudwatch-logs.py[&quot;{$LOG_GROUP}&quot;,&quot;{$LOG_STREAM}&quot;]</key>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Logs</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{str(&quot;Sem logs&quot;)}=0</expression>
+                            <name>{ITEM.VALUE}</name>
+                            <priority>DISASTER</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$LOG_GROUP}</macro>
+                </macro>
+                <macro>
+                    <macro>{$LOG_STREAM}</macro>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>

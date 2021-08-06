@@ -1,0 +1,49 @@
+#!/usr/bin/python
+from collections import defaultdict
+from pyzabbix import ZabbixAPI
+import boto3
+
+url = "{{ ZABBIX_URL }}"
+user = "{{ user_zabbix }}"
+password = "{{ pass_zabbix }}"
+
+zapi = ZabbixAPI(url)
+zapi.login(user,password)
+
+def get_zabbix_instances(zapi):
+    zabbix_ip=[]
+    for host in zapi.host.get(output="extend"):
+        ips = zapi.hostinterface.get(output="extend", hostids = str(host['hostid']))
+        if ips[0]['ip'] != "127.0.0.1":
+            zabbix_ip.append(ips[0]['ip'])
+    return zabbix_ip
+
+def get_aws_instances():
+    aws_ip=[]
+    regioes = ['us-east-1', 'sa-east-1']
+
+    for regiao in regioes:
+        ec2 = boto3.resource('ec2',aws_access_key_id="{{ aws_access_key_id }}", aws_secret_access_key="{{ aws_secret_access_key }}", region_name = regiao)
+
+        running_instances = ec2.instances.filter(Filters=[{
+            'Name': 'instance-state-name',
+            'Values': ['running']}])
+
+        ec2info = defaultdict()
+        for instance in running_instances:
+            aws_ip.append(instance.private_ip_address)
+
+    return aws_ip
+
+def check_aws_instance_is_in_the_zabbix(zabbix_ip, aws_ip):
+    qntd_instaces_no_monit=0
+    for instance in aws_ip:
+        if instance != "{{ ZABBIX_PRIVATE_IP }}":
+            if instance not in zabbix_ip:
+                qntd_instaces_no_monit += 1
+    return qntd_instaces_no_monit
+
+zabbixIp = get_zabbix_instances(zapi)
+awsIp = get_aws_instances()
+qntd_instances_no_monit = check_aws_instance_is_in_the_zabbix(zabbixIp,awsIp)
+print(qntd_instances_no_monit)

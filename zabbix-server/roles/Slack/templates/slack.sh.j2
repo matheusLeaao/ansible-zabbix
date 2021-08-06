@@ -1,0 +1,41 @@
+#!/bin/bash
+  
+author="CLIENTE"
+url='{{ WEBHOOK }}'
+channel="$1"
+subject="$2"
+message="$3"
+ 
+emoji='none'
+color='#000000'
+ 
+if [ $subject = 'RECOVERY' ]; then
+emoji=':grinning:'
+color='#18cc1b'
+ 
+elif [ $subject = 'PROBLEM' ]; then
+emoji=':fire:'
+color='#b80b0b'
+ 
+else
+emoji=':no_moutch:'
+color='#8d928d'
+fi
+ 
+payload="payload={
+\"channel\": \"${channel}\",
+\"username\": \"Zabbix\",
+\"icon_emoji\": \"${emoji}\",
+\"attachments\": [{
+\"fallback\": \"${message}\",
+\"color\": \"${color}\",
+\"author_name\": \"${author}\",
+\"fields\": [{
+\"title\": \"${subject}\",
+\"value\": \"${message}\",
+\"short\": false
+}]
+}]
+}"
+ 
+curl -m 5 --data-urlencode "${payload}" $url -A 'zabbix-slack-alertscript / https://github.com/ericoc/zabbix-slack-alertscript'

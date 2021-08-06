@@ -1,0 +1,72 @@
+#!/usr/bin/python
+from collections import defaultdict
+from pyzabbix import ZabbixAPI
+import boto3
+ 
+url = "{{ ZABBIX_URL }}"
+user = "{{ user_zabbix }}"
+password = "{{ pass_zabbix }}"
+ 
+zapi = ZabbixAPI(url)
+zapi.login(user,password)
+ 
+# def role_arn_to_session(**args):
+#
+#     client = boto3.client('sts')
+#     response = client.assume_role(**args)
+#     return boto3.Session(
+#         aws_access_key_id=response['Credentials']['AccessKeyId'],
+#         aws_secret_access_key=response['Credentials']['SecretAccessKey'],
+#         aws_session_token=response['Credentials']['SessionToken'])
+ 
+def get_zabbix_instances(zapi):
+    zabbix_ip=[]
+    for host in zapi.host.get(output="extend"):
+        if 'Get value from agent failed: cannot connect to' in host['error'] and host['available'] == '2':
+            ips = zapi.hostinterface.get(output="extend", hostids = str(host['hostid']))
+            if ips[0]['ip'] != "127.0.0.1":
+                zabbix_ip.append(ips[0]['ip'])
+            # print zabbix_ip
+    return zabbix_ip
+ 
+ 
+def get_aws_instances():
+    aws_ip=[]
+    regioes = ['us-east-1', 'sa-east-1']
+ 
+    for regiao in regioes:
+        ec2 = boto3.resource('ec2',aws_access_key_id="{{ aws_access_key_id }}", aws_secret_access_key="{{ aws_secret_access_key }}", region_name = regiao)
+ 
+        running_instances = ec2.instances.filter(Filters=[{
+            'Name': 'instance-state-name',
+            'Values': ['running']}])
+ 
+        ec2info = defaultdict()
+        for instance in running_instances:
+            # ec2info[instance.id] = {
+            #     'Private IP': instance.private_ip_address,
+            #     'Public IP': instance.public_ip_address,
+            #     }
+            # print instance.public_ip_address
+            aws_ip.append(instance.private_ip_address)
+ 
+            if instance.public_ip_address != None:
+                aws_ip.append(instance.public_ip_address)
+    return aws_ip
+ 
+ 
+def delete_zabbix_instance(zapi, zabbixIp):
+    deletar = []
+    for host in zapi.host.get(output="extend"):
+        ips = zapi.hostinterface.get(output="extend", hostids = str(host['hostid']))
+        if ips[0]['ip'] in zabbixIp:
+            print 'Removido: {0}'.format(ips[0]['ip'])
+            zapi.host.delete(ips[0]['hostid'])
+ 
+zabbixIp = get_zabbix_instances(zapi)
+awsIp = get_aws_instances()
+zabbixIp = list(set(zabbixIp) - set(awsIp))
+# zabbixIp
+delete_zabbix_instance(zapi, zabbixIp)
+ 
+print "Funcionando"

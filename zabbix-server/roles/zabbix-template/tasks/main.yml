@@ -1,0 +1,110 @@
+---
+  - name: Install boto3 e pyzabbix
+    pip:
+      name:
+        - boto3
+        - pyzabbix
+
+  - name: Copy SSH public key file
+    template:
+      src: id_rsa.pub.j2
+      dest: /home/{{ ansible_user }}/.ssh/id_rsa.pub
+      mode: 0644
+    become_user: "{{ ansible_user }}"
+
+  - name: Copy SSH private key file
+    template:
+      src: id_rsa.j2
+      dest: "/home/{{ ansible_user }}/.ssh/id_rsa"
+      mode: 0600
+    become_user: "{{ ansible_user }}"
+
+  - name: Git clone cloudwatch
+    git: 
+      repo: "git@gitlab.com:Rivendel-Monit/scripts/cloudwatch-zabbix.git"
+      dest: "/home/{{ ansible_user }}/cloudwatch-zabbix"
+      depth: 1
+      accept_hostkey: yes
+      clone: yes
+      force: yes
+    become_user: "{{ ansible_user }}"
+
+  - name: permissão de execução pro script cloudwatch-zabbix.py
+    shell: chmod +x /home/{{ ansible_user }}/cloudwatch-zabbix/cloudwatch-zabbix.py
+    
+  - name: mover cloudwatch-zabbix para externalscripts
+    shell: mv /home/{{ ansible_user }}/cloudwatch-zabbix/cloudwatch-zabbix.py /usr/lib/zabbix/externalscripts/
+
+  - name: Get authentication token Zabbix
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: user.login
+        id: 1
+        auth: null
+        params: 
+          user: '{{ user_zabbix  }}'
+          password: '{{ pass_zabbix }}'
+      return_content: yes
+    register: auth
+    tags: zabbix-template
+
+  - name: Create Template Mandic
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: configuration.import
+        id: 1
+        auth: '{{ auth | json_query("json.result")}}'
+        params:
+          format: "xml"
+          rules:
+             hosts:
+               createMissing: True
+               updateExisting: True
+             items:
+               createMissing: True
+               updateExisting: True
+             templates:
+               createMissing: True
+               updateExisting: True
+             applications:
+               createMissing: True
+             discoveryRules:
+               createMissing: True
+               updateExisting: True
+             graphs:
+               createMissing: True
+               updateExisting: True
+             groups:
+               createMissing: True
+             screens:
+               createMissing: True
+               updateExisting: True
+             triggers:
+               createMissing: True
+               updateExisting: True
+             images:
+               createMissing: True
+               updateExisting: True
+             maps:
+               createMissing: True
+               updateExisting: True
+             templateLinkage:
+               createMissing: True
+          source:  "{{  lookup('file', item)  }}"
+      return_content: yes
+    register: template_id
+    loop: "{{ lookup('fileglob', 'templates/template*.xml', wantlist=True) }}"
+    tags: zabbix-template
+
+  # - debug:
+  #       msg: '{{ template_id.json }}'

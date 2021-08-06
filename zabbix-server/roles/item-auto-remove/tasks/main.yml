@@ -1,0 +1,115 @@
+---
+  - name: Install base Packages
+    package:
+      name:
+        - python3
+      state: latest
+
+  - name: Install boto3 e pyzabbix
+    pip:
+      name:
+        - boto3
+        - pyzabbix
+        - jmespath
+
+  - name: Install boto3 e pyzabbix
+    pip:
+      name:
+        - boto3
+        - pyzabbix
+        - jmespath
+      executable: pip3
+
+  - name: Copy SSH public key file
+    template:
+      src: id_rsa.pub.j2
+      dest: /home/centos/.ssh/id_rsa.pub
+      mode: 0644
+    become_user: centos
+
+  - name: Copy SSH private key file
+    template:
+      src: id_rsa.j2
+      dest: /home/centos/.ssh/id_rsa
+      mode: 0600
+    become_user: centos
+
+  - name: Git clone auto-remove
+    git: 
+      repo: "git@gitlab.com:Rivendel-Monit/scripts/auto-remove.git"
+      dest: "/home/centos/auto-remove"
+      depth: 1
+      accept_hostkey: yes
+      clone: yes
+      force: yes
+    become_user: centos
+
+  - name: config zabbix_user
+    replace:
+      path: /home/centos/auto-remove/auto-remove.py
+      regexp: "Admin"
+      replace: '{{ user_zabbix }}'
+
+  - name: zabbix_domain_url={{ ZABBIX_URL }}
+    replace:
+      path: /home/centos/auto-remove/auto-remove.py
+      regexp: "DOMAIN_URL"
+      replace: '{{ ZABBIX_URL }}'
+
+  - name: config zabbix passwd
+    replace:
+      path: /home/centos/auto-remove/auto-remove.py
+      regexp: "PASS"
+      replace: '{{ pass_zabbix }}'
+
+  - name: moving auto-remove.py
+    command: mv /home/centos/auto-remove/auto-remove.py /usr/lib/zabbix/externalscripts/
+
+  - name: Change file ownership, group and permissions auto-remove.py
+    file:
+      path: /usr/lib/zabbix/externalscripts/auto-remove.py
+      owner: root
+      group: root
+      mode: '0755'
+
+  - name: Get authentication token Zabbix
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: user.login
+        id: 1
+        auth: null
+        params: 
+          user: '{{ user_zabbix }}'
+          password: '{{ pass_zabbix }}'
+      return_content: yes
+    register: auth
+
+  - name: Criar item auto remocao
+    uri:
+      url: '{{ url_zabbix_api }}'
+      body_format: json
+      headers:
+        Content-type: application/json
+      body: 
+        jsonrpc: 2.0
+        method: item.create
+        id: 1
+        auth: '{{ auth | json_query("json.result")}}'
+        params:
+          name: Auto remoção
+          hostid: "10084"
+          interfaceid: "1"
+          key_: "auto-remove.py[{{ region }}]"
+          type: "10"
+          value_type: "4"
+          delay: 1m
+          status: "1"
+    register: output
+
+  - debug:
+      msg: '{{ output }}'

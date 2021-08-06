@@ -1,0 +1,7 @@
+---
+user_zabbix: "Admin"
+pass_zabbix: ""
+ZABBIX_URL: "http://localhost/"
+url_zabbix_api: "http://localhost/api_jsonrpc.php"
+region: "us-east-1"
+
